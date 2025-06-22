@@ -1,25 +1,30 @@
 # Robot Framework API Test Project
 
-This project contains Robot Framework tests for API endpoints described in the provided analysis files. It uses Python and the `requests` library for HTTP requests, with all API logic implemented in Python keywords (not using RequestsLibrary).
+This project contains Robot Framework tests for DMS2 API endpoints. All API logic is implemented in Python, and test data is provided as Python modules for direct import. No RequestsLibrary or JSON data files are used.
 
-## Structure
-- `tests/` — Robot Framework test cases
-- `libs/` — Python library with API keywords
-- `data/` — Test data in JSON format
+## Project Structure
+- `tests/` — Robot Framework test cases (one test per file, e.g. create/get document)
+- `resource/` — Resource files with reusable Robot Framework keywords
+- `libs/` — Python library with API keywords (HTTP logic)
+- `data/` — Test data as Python files (imported as modules)
 
-## How to run tests
+## How to Run Tests
 1. Install dependencies:
    ```sh
    pip install -r requirements.txt
    ```
-2. Run tests:
+2. Run tests from the project root, ensuring `PYTHONPATH` includes the root directory:
    ```sh
-   robot tests/
+   PYTHONPATH=. robot tests/
    ```
+   This is required so Robot Framework can import the `data` modules.
 
-## Scenarios
+## Scenarios Covered
 - Create a new document (POST /api/{repositoryName}/documents)
 - Get a document by uniqueId (GET /api/{repositoryName}/documents/document)
 
-All test data and configuration are in `data/testdata.json`. Update variables and authentication as needed for your environment.
-# rb
+## Notes
+- Test data is defined in `data/create_document.py` and `data/get_document.py` as Python variables.
+- Resource files in `resource/` provide reusable keywords for test setup and API calls.
+- All API calls are made via Python keywords in `libs/api_client.py`.
+- Update variables and authentication in the data files as needed for your environment.
