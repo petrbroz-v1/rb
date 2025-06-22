@@ -1,0 +1,55 @@
+Use Case 1:
+Název: Uložení dokumentu do DMS2 přes aplikaci ICH (REQ_01)
+Cílový systém: DMS2
+Zdroje: Aplikace ICH
+Stav požadavku: READY-DEV
+Business požadavek: BREQ_01 – Ukládání dokumentů
+
+Popis:
+Uživatel (nebo aplikace ICH) chce uložit nový dokument (např. sken dokladu) do systému DMS2. Dokument obsahuje jak binární obsah, tak metadata. Při nahrání dokumentu dojde k uložení v DMS2 a metadata jsou paralelně zaznamenána v systému ICH.
+
+Předpoklady:
+Aplikace ICH má přístup k API KONG nad DMS2.
+API endpoint /document je dostupný a funkční.
+Uživatel nebo proces má práva pro uložení dokumentu.
+
+Scénář:
+Uživatel zpracuje dokument ve zdrojovém systému (např. sken OP).
+Aplikace ICH odešle požadavek POST /document na DMS2.
+Vstup obsahuje: binární obsah dokumentu + metadata (documentId, createdBy, createdDate, volitelně partyId).
+DMS2 uloží dokument a přidělí mu UUID.
+DMS2 vrací odpověď s potvrzením o uložení, včetně UUID a výchozí verze.
+Metadata dokumentu jsou uložena v ICH (DMS2 si drží jen část metadat).
+
+Očekávaný výsledek:
+Dokument je úspěšně uložen.
+UUID a verze jsou vráceny v response.
+Žádné chyby, systém funguje podle očekávání.
+
+###################################################################
+Use Case 2
+Název: Vyhledání existujícího dokumentu v DMS2 podle UUID (REQ_05)
+Cílový systém: DMS2
+Zdroje: Aplikace ICH nebo UniFE
+Stav požadavku: READY-DEV
+Business požadavek: BREQ_03 – Vyhledávání a indexace
+
+Popis:
+Uživatel (nebo aplikace) potřebuje dohledat existující dokument uložený v DMS2 pomocí jednoznačného identifikátoru (UUID). Dokument je vyhledán a vrácen včetně metadat a obsahu.
+
+Předpoklady:
+Dokument byl dříve uložen a existuje v systému DMS2.
+Aplikace má právo dokument vyhledat a zobrazit.
+UUID dokumentu je známé (např. uložen v CRM/ICH).
+
+Scénář:
+Aplikace odešle požadavek GET /document/{documentId}.
+DMS2 ověří oprávnění volajícího systému.
+Systém najde dokument podle UUID.
+Vrací metadata a binární obsah dokumentu.
+Vrací aktuální verzi (CURRENT_VERSION) nebo verzi definovanou ve vstupu.
+
+Očekávaný výsledek:
+Dokument je úspěšně nalezen a vrácen.
+Vrácený obsah odpovídá uloženému.
+Vyhledávání proběhne bez chyby, včetně paginace nebo filtrace podle vstupních parametrů.

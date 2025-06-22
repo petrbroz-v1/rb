@@ -1,0 +1,66 @@
+Use Case 1
+Title: Saving a Document to DMS2 via the ICH Application (REQ_01)
+Target System: DMS2
+Sources: ICH Application
+Request Status: READY-DEV
+Business Requirement: BREQ_01 – Document Storage
+
+Description:
+The user (or the ICH application) wants to save a new document (e.g., a scanned certificate) into the DMS2 system. The document includes both binary content and metadata. When the document is uploaded, it is stored in DMS2, and the metadata is simultaneously recorded in the ICH system.
+
+Assumptions:
+The ICH application has access to the KONG API above DMS2.
+The API endpoint /document is available and functional.
+The user or process has permission to store the document.
+
+Scenario:
+The user processes the document in the source system (e.g., scans an ID card).
+The ICH application sends a POST /document request to DMS2.
+The input includes: binary document content + metadata (documentId, createdBy, createdDate, optionally partyId).
+DMS2 stores the document and assigns it a UUID.
+DMS2 returns a response confirming storage, including the UUID and default version.
+The document’s metadata is stored in ICH (DMS2 only keeps part of the metadata).
+
+Expected Result:
+The document is successfully stored.
+UUID and version are returned in the response.
+No errors, the system works as expected.
+
+###################################################################
+Use Case 2
+Title: Retrieving an Existing Document from DMS2 by UUID (REQ_05)
+Target System: DMS2
+Sources: ICH Application or UniFE
+Request Status: READY-DEV
+Business Requirement: BREQ_03 – Search and Indexing
+
+Description:
+The user (or application) needs to retrieve an existing document stored in DMS2 using a unique identifier (UUID). The document is found and returned along with its metadata and content.
+
+Assumptions:
+
+The document was previously stored and exists in DMS2.
+
+The application has the rights to search for and display the document.
+
+The UUID of the document is known (e.g., stored in CRM/ICH).
+
+Scenario:
+
+The application sends a GET /document/{documentId} request.
+
+DMS2 verifies the calling system's permissions.
+
+The system finds the document by UUID.
+
+It returns the document’s metadata and binary content.
+
+It returns the current version (CURRENT_VERSION) or a version defined in the input.
+
+Expected Result:
+
+The document is successfully found and returned.
+
+The returned content matches what was stored.
+
+The search completes without error, including pagination or filtering based on input parameters.
