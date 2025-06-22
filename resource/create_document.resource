@@ -8,13 +8,15 @@ Get Data For Create Document Test
     ${repository}=    Get Repository
     ${headers}=       Get Headers
     ${document_data}=      Get Document Data
+    ${env}=      Get Env
     Set Suite Variable    ${REPOSITORY}    ${repository}
     Set Suite Variable    ${HEADERS}       ${headers}
     Set Suite Variable    ${DOCUMENT_DATA}      ${document_data}
+    Set Suite Variable    ${ENV}      ${env}
 
 Create Document
     [Documentation]    Creates a new document using the API
-    [Arguments]    ${repository}    ${document_data}    ${headers}
-    ${result}=    Create Document Api    ${repository}    ${document_data}    ${headers}
+    [Arguments]    ${repository}    ${env}    ${document_data}    ${headers}
+    ${result}=    Create Document Api    ${repository}    ${env}    ${document_data}    ${headers}
     Set Suite Variable    ${UNIQUE_ID}    ${result['uniqueId']}
     RETURN    ${result}

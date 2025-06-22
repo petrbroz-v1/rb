@@ -1,4 +1,5 @@
 repository = "demo-repo"
+env = "http://restapi.dms2-dev.r53.rbaws.cz:8088/rb-nkl/v1"
 
 headers = {
     "X-Api-Name": "test-service",
@@ -20,3 +21,6 @@ def get_headers():
 
 def get_unique_id():
     return unique_id
+
+def get_env():
+    return env

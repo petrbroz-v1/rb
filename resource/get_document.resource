@@ -12,9 +12,11 @@ Get Data For Get Document Test
     Set Suite Variable    ${HEADERS}       ${headers}
     ${UNIQUE_ID}=    Set Variable If    '${UNIQUE_ID}' != ''    ${UNIQUE_ID}    ${unique_id}
     Set Suite Variable    ${UNIQUE_ID}    ${UNIQUE_ID}
+    ${env}=      Get Env
+    Set Suite Variable    ${ENV}      ${env}
 
 Get Document
     [Documentation]    Retrieves a document by its unique ID using the API
-    [Arguments]    ${repository}    ${unique_id}    ${headers}
-    ${result}=    Get Document Api    ${repository}    ${unique_id}    ${headers}
+    [Arguments]    ${repository}    ${env}    ${unique_id}    ${headers}
+    ${result}=    Get Document Api    ${repository}    ${env}    ${unique_id}    ${headers}
     RETURN    ${result}
