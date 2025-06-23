@@ -1,58 +1,45 @@
-Use Case 1 – REQ_01
-Title: Saving a new document including binary content and metadata into DMS2
+Use Case 1 – Saving a New Document (REQ_01)
 
-Objective:
-Verify that DMS2 allows successful storage of a new document containing both binary data and metadata, and that the response returns the UUID and current version information.
+Prerequisites:
+    - User has access to the API.
+    - The service is available.
+    - User has permission to save the document.
+    - The repository name is mainRepository.
 
-Preconditions:
-The DMS2 system is available and ready to process incoming POST requests.
-The application (e.g., ICH or UniFE) is authenticated and has permission to store documents.
-The document with the given content does not yet exist in the system (this is the first version).
-The metadata is valid as expected by the backend.
-The input data is properly formatted (multipart/form-data or JSON according to the API specification).
+Steps:
+1. User sends a POST request to the endpoint: /api/mainRepository/documents
+2. The request is of type multipart/form-data and contains:
+        - one binary file in the field files
+        - a metadata field in JSON format, containing:
+            - documentType: "contract"
+            - attributes: an object with required attribute values according to the document type
+3. The system processes the request and saves the document.
+4. The system returns a response with a DocumentReference object containing:
+        - uniqueId: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
+        - version: "1.0"
 
-Scenario:
-Step	Action	                                                                            Expected Result
-1	    The application sends a POST request to /api/{repositoryName}/documents/document	Backend receives the request
-2	    The request body contains:
-            – binary document content (content)
-            – metadata (e.g., documentName, createdBy, createdDate, partyId)	
-3	Backend validates the metadata and content	                                            Input validation is successful
-4	Backend saves the document and metadata	                                                Document and metadata are stored in the storage and database
-5	Backend creates a new version of the document (initial – no/minor/major version is set)	Version is empty or null as per design
-6	Backend responds with HTTP 201 Created	                                                Response contains JSON with the UUID and current version
+Expected result:
+    - The document is successfully saved.
+    - The response includes uniqueId and version.
+    - The operation completes without error.
 
-Expected Result:
-Response: HTTP 201 Created
+###################################################################
+Use Case 2 – Finding a Document by ID (REQ_05)
 
-Response body contains:
-uuid: Unique identifier of the document
-version: Current version
+Prerequisites:
+    - A document with uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 exists.
+    - User has permission to view it.
+    - The repository name is mainRepository.
 
-Use Case 2 – REQ_05
-Title: Retrieving a specific document from DMS2 using UUID (uniqueId) sent in the body of a GET request
+Steps:
+1. User sends a GET request to the endpoint: /api/mainRepository/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
+2. The system searches for the document based on the uniqueId value.
+3. The system returns a response containing:
+    - the document metadata
+    - the binary content of the document
+    - the document version
 
-Objective:
-Verify that DMS2 correctly processes the request to find a document based on the UUID sent in the body and returns the current version of the document in the expected format.
-
-Preconditions:
-The document with the given UUID (uniqueId) exists in the system.
-The API endpoint /api/{repositoryName}/documents/document is available.
-User authentication and authorization are valid.
-Document version is not specified → system returns the CURRENT version.
-
-Scenario:
-Step	Action	                                                                                Expected Result
-1	    The application sends a GET request to /api/client/documents/document	                Backend receives the request with the body containing uniqueId
-2	    The request body contains JSON: { "uniqueId": "123e4567-e89b-12d3-a456-426614174000" }	A valid UUID for the document being searched for
-3	    Backend validates user permissions (based on X-User-* headers)	If permissions are valid → continue
-4	    Backend finds the document by UUID and retrieves the CURRENT version	Document is found, appropriate version is loaded
-5	    Backend builds and sends the response with HTTP 200 OK	Contains metadata, UUID, createdDate, etc.
-
-Expected Result:
-Response: HTTP 200 OK
-
-Response body contains:
-documentId (UUID)
-version = CURRENT
-createdBy, createdDate, documentName, etc.
+Expected result:
+  - The document is successfully found.
+  - The returned response contains metadata, version, and document content.
+  - The operation completes without error.

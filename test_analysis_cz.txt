@@ -1,59 +1,45 @@
-Use Case 1 - REQ_01
-Název: Uložení nového dokumentu včetně binárního obsahu a metadat do DMS2
-
-Cíl:
-Ověřit, že DMS2 umožní úspěšné uložení nového dokumentu, který obsahuje binární data i metadata, a v odpovědi vrátí UUID a informaci o aktuální verzi.
+Use Case 1 – Uložení nového dokumentu (REQ_01)
 
 Předpoklady:
-Systém DMS2 je dostupný a připraven zpracovat příchozí POST požadavek.
-Aplikace (např. ICH nebo UniFE) je autentizovaná a má práva pro ukládání dokumentů.
-Dokument s daným obsahem zatím v systému neexistuje (jedná se o první verzi).
-Metadata jsou validní dle očekávání backendu.
-Vstupní data jsou správně naformátována (multipart/form-data nebo JSON podle API specifikace).
+-   Uživatel má přístup k API.
+-   Služba je dostupná.
+-   Uživatel má oprávnění provést uložení dokumentu.
+-   Název repozitáře je mainRepository.
 
-Scénář:
-Krok	Akce	                                                                            Očekávaný výsledek
-1	    Aplikace odešle POST požadavek na /api/{repositoryName}/documents/document	        Backend přijme požadavek
-2	    V těle požadavku jsou předány:	
-            – binární obsah dokumentu (content)	
-            – metadata (např. documentName, createdBy, createdDate, partyId)	
-3	    Backend ověří metadata a obsah	                                                    Validace vstupních dat proběhne úspěšně
-4	    Backend uloží dokument a metadata	                                                Dokument a metadata jsou uložené do úložiště a databáze
-5	    Backend vytvoří novou verzi dokumentu (výchozí – žádná/minor/major není nastavena)	Verze je prázdná nebo null dle návrhu
-6	    Backend odpoví s HTTP 201 Created	                                                V odpovědi je JSON s UUID a aktuální verzí (version)
+Kroky:
+1. Uživatel odešle POST požadavek na rozhraní: /api/mainRepository/documents
+2.  Požadavek je typu multipart/form-data a obsahuje:
+        - jeden binární soubor v poli files
+        - pole metadata ve formátu JSON, obsahující:
+            - documentType: "contract"
+            - attributes: objekt s požadovanými hodnotami atributů podle typu dokumentu
+3. Systém zpracuje požadavek a uloží dokument.
+4. Systém vrátí odpověď s objektem DocumentReference, který obsahuje:
+        - uniqueId: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
+        - version: "1.0"
 
 Očekávaný výsledek:
-Response: HTTP 201 Created
-
-Tělo odpovědi obsahuje:
-uuid: unikátní identifikátor dokumentu
-version: aktuální verze
+    - Dokument je úspěšně uložen.
+    - V odpovědi je vráceno uniqueId a version.
+    - Operace proběhne bez chyby.
 
 ###################################################################
-Use Case 2 - REQ_05
-Název: Vyhledání konkrétního dokumentu v DMS2 pomocí UUID (uniqueId) zaslaného v těle GET požadavku
-
-Cíl:
-Ověřit, že DMS2 správně zpracuje požadavek na vyhledání dokumentu podle UUID zaslaného v těle a vrátí aktuální verzi dokumentu v odpovídajícím formátu.
+Use Case 2 – Vyhledání dokumentu podle ID (REQ_05)
 
 Předpoklady:
-Dokument s daným UUID (uniqueId) existuje v systému.
-API endpoint /api/{repositoryName}/documents/document je dostupný.
-Autentizace a oprávnění uživatele jsou v pořádku.
-Verze dokumentu není specifikována → systém vrací CURRENT.
+    - Dokument s uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 existuje.
+    - Uživatel má oprávnění k jeho zobrazení.
+    - Název repozitáře je mainRepository.
 
-Scénář:
-Krok	Akce	                                                                                    Očekávaný výsledek
-1	    Aplikace odešle GET požadavek na /api/client/documents/document	                            Backend přijme požadavek s tělem obsahujícím uniqueId
-2	    V těle JSON požadavku je uvedeno: { "uniqueId": "123e4567-e89b-12d3-a456-426614174000" }	Validní UUID dokumentu pro hledání
-3	    Backend ověří oprávnění uživatele (dle hlaviček X-User-*)	                                Pokud oprávnění platná → pokračuje
-4	    Backend vyhledá dokument podle UUID a načte CURRENT verzi	                                Dokument nalezen, načtena odpovídající verze
-5	    Backend sestaví a odešle odpověď s HTTP 200 OK	                                            Obsahuje metadata, UUID, createdDate, apod.
+Kroky:
+1.  Uživatel odešle GET požadavek na rozhraní: /api/mainRepository/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
+2.  Systém vyhledá dokument na základě hodnoty uniqueId.
+3.  Systém vrátí odpověď obsahující:
+        - metadata dokumentu
+        - binární obsah dokumentu
+        - verzi dokumentu
 
 Očekávaný výsledek:
-Response: HTTP 200 OK
-
-Tělo odpovědi obsahuje:
-- documentId (UUID)
-- version = CURRENT
-- createdBy, createdDate, documentName, atd.
+    - Dokument je úspěšně nalezen.
+    - Vrácená odpověď obsahuje metadata, verzi a obsah dokumentu.
+    - Operace proběhne bez chyby.
