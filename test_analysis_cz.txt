@@ -19,7 +19,7 @@ Kroky:
         - version: "1.0"
 
 Očekávaný výsledek:
-    - Dokument je úspěšně uložen.
+    - Dokument je úspěšně uložen - resp. HTTP 201
     - V odpovědi je vráceno uniqueId a version.
     - Operace proběhne bez chyby.
 
@@ -40,6 +40,6 @@ Kroky:
         - verzi dokumentu
 
 Očekávaný výsledek:
-    - Dokument je úspěšně nalezen.
+    - Dokument je úspěšně nalezen - resp. HTTP 200
     - Vrácená odpověď obsahuje metadata, verzi a obsah dokumentu.
     - Operace proběhne bez chyby.

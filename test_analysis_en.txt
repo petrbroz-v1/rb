@@ -19,7 +19,7 @@ Steps:
         - version: "1.0"
 
 Expected result:
-    - The document is successfully saved.
+    - The document is successfully saved  - resp. HTTP 201.
     - The response includes uniqueId and version.
     - The operation completes without error.
 
@@ -40,6 +40,6 @@ Steps:
     - the document version
 
 Expected result:
-  - The document is successfully found.
+  - The document is successfully found  - resp. HTTP 200.
   - The returned response contains metadata, version, and document content.
   - The operation completes without error.
