@@ -1,45 +1,59 @@
 Use Case 1 – Saving a New Document (REQ_01)
 
-Prerequisites:
-    - User has access to the API.
-    - The service is available.
-    - User has permission to save the document.
-    - The repository name is mainRepository.
+Preconditions:
+- The user has access to the API and permission to save a document.
+- The DMS2 service is available.
 
 Steps:
-1. User sends a POST request to the endpoint: /api/mainRepository/documents
+1. The user sends a POST request to the endpoint: /api/${REPOSITORY}/documents
 2. The request is of type multipart/form-data and contains:
-        - one binary file in the field files
-        - a metadata field in JSON format, containing:
-            - documentType: "contract"
-            - attributes: an object with required attribute values according to the document type
+    - Required headers:
+        - X-Api-Name
+        - X-Request-Id
+        - X-Correlation-Id
+        - X-Request-App
+        - X-User-Id
+        - X-User-Roles
+        - X-User-Type
+    - metadata field in JSON format, containing:
+        - businessId
+        - documentType
+        - dataEntries (an array with at least one record containing name and filename)
+    - files field (binary content of the document)
 3. The system processes the request and saves the document.
 4. The system returns a response with a DocumentReference object containing:
-        - uniqueId: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
-        - version: "1.0"
+    - uniqueId
+    - dataEntries
 
-Expected result:
-    - The document is successfully saved  - resp. HTTP 201.
-    - The response includes uniqueId and version.
-    - The operation completes without error.
+Expected Result:
+- The document is successfully saved (HTTP 201).
+- The response contains uniqueId and dataEntries.
+- The operation completes without error.
 
 ###################################################################
-Use Case 2 – Finding a Document by ID (REQ_05)
+Use Case 2 – Search for a Document by ID (REQ_05)
 
-Prerequisites:
-    - A document with uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 exists.
-    - User has permission to view it.
-    - The repository name is mainRepository.
+Preconditions:
+- A document with uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 exists.
+- The user has permission to view it.
 
 Steps:
-1. User sends a GET request to the endpoint: /api/mainRepository/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
-2. The system searches for the document based on the uniqueId value.
-3. The system returns a response containing:
-    - the document metadata
-    - the binary content of the document
-    - the document version
+1. The user sends a GET request to the endpoint: /api/${REPOSITORY}/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
+2. Required headers:
+    - X-Api-Name
+    - X-Request-Id
+    - X-Correlation-Id
+    - X-Request-App
+    - X-User-Id
+    - X-User-Roles
+    - X-User-Type
+3. The system searches for the document based on the value of uniqueId.
+4. The system returns a response containing:
+    - uniqueId
+    - documentType
+    - dataEntries
 
-Expected result:
-  - The document is successfully found  - resp. HTTP 200.
-  - The returned response contains metadata, version, and document content.
-  - The operation completes without error.
+Expected Result:
+- The document is successfully found (HTTP 200).
+- The response contains uniqueId, documentType, dataEntries.
+- The operation completes without error.

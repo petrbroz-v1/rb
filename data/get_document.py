@@ -12,15 +12,3 @@ headers = {
 }
 
 unique_id = "e58ed763-928c-4155-bee9-fdbaaadc15f3"
-
-def get_repository():
-    return repository
-
-def get_headers():
-    return headers
-
-def get_unique_id():
-    return unique_id
-
-def get_env():
-    return env

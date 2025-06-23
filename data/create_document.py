@@ -14,17 +14,7 @@ headers = {
 document_data = {
     "businessId": "B123",
     "documentType": "ID_CARD",
-    "dataEntries": [{"name": "page1", "filename": "id_card.jpg"}]
+    "dataEntries": [{"name": "page1", "filename": "create_document_testFile.pdf"}]
 }
 
-def get_repository():
-    return repository
-
-def get_headers():
-    return headers
-
-def get_document_data():
-    return document_data
-
-def get_env():
-    return env
+file_path = "data/documents/create_document_testFile.pdf"

@@ -1,45 +1,59 @@
 Use Case 1 – Uložení nového dokumentu (REQ_01)
 
 Předpoklady:
--   Uživatel má přístup k API.
--   Služba je dostupná.
--   Uživatel má oprávnění provést uložení dokumentu.
--   Název repozitáře je mainRepository.
+- Uživatel má přístup k API a oprávnění pro uložení dokumentu.
+- Služba DMS2 je dostupná.
 
 Kroky:
-1. Uživatel odešle POST požadavek na rozhraní: /api/mainRepository/documents
-2.  Požadavek je typu multipart/form-data a obsahuje:
-        - jeden binární soubor v poli files
-        - pole metadata ve formátu JSON, obsahující:
-            - documentType: "contract"
-            - attributes: objekt s požadovanými hodnotami atributů podle typu dokumentu
+1. Uživatel odešle POST požadavek na rozhraní: /api/${REPOSITORY}/documents
+2. Požadavek je typu multipart/form-data a obsahuje:
+    - Povinné parametry hlavičky:
+        - X-Api-Name
+        - X-Request-Id
+        - X-Correlation-Id
+        - X-Request-App
+        - X-User-Id
+        - X-User-Roles
+        - X-User-Type
+    - pole metadata ve formátu JSON, obsahující:
+        - businessId
+        - documentType
+        - dataEntries (pole s alespoň jedním záznamem obsahujícím name a filename)
+    - pole files (binární obsah dokumentu)
 3. Systém zpracuje požadavek a uloží dokument.
 4. Systém vrátí odpověď s objektem DocumentReference, který obsahuje:
-        - uniqueId: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
-        - version: "1.0"
+    - uniqueId
+    - dataEntries
 
 Očekávaný výsledek:
-    - Dokument je úspěšně uložen - resp. HTTP 201
-    - V odpovědi je vráceno uniqueId a version.
-    - Operace proběhne bez chyby.
+- Dokument je úspěšně uložen (HTTP 201).
+- V odpovědi je vráceno uniqueId a dataEntries.
+- Operace proběhne bez chyby.
 
 ###################################################################
 Use Case 2 – Vyhledání dokumentu podle ID (REQ_05)
 
 Předpoklady:
-    - Dokument s uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 existuje.
-    - Uživatel má oprávnění k jeho zobrazení.
-    - Název repozitáře je mainRepository.
+- Dokument s uniqueId = e58ed763-928c-4155-bee9-fdbaaadc15f3 existuje.
+- Uživatel má oprávnění k jeho zobrazení.
 
 Kroky:
-1.  Uživatel odešle GET požadavek na rozhraní: /api/mainRepository/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
-2.  Systém vyhledá dokument na základě hodnoty uniqueId.
-3.  Systém vrátí odpověď obsahující:
-        - metadata dokumentu
-        - binární obsah dokumentu
-        - verzi dokumentu
+1. Uživatel odešle GET požadavek na rozhraní: /api/${REPOSITORY}/documents/document?uniqueId=e58ed763-928c-4155-bee9-fdbaaadc15f3
+2. Povinné parametry hlavičky:
+    - X-Api-Name
+    - X-Request-Id
+    - X-Correlation-Id
+    - X-Request-App
+    - X-User-Id
+    - X-User-Roles
+    - X-User-Type
+3. Systém vyhledá dokument na základě hodnoty uniqueId.
+4. Systém vrátí odpověď obsahující:
+    - uniqueId
+    - documentType
+    - dataEntries
 
 Očekávaný výsledek:
-    - Dokument je úspěšně nalezen - resp. HTTP 200
-    - Vrácená odpověď obsahuje metadata, verzi a obsah dokumentu.
-    - Operace proběhne bez chyby.
+- Dokument je úspěšně nalezen (HTTP 200).
+- Vrácená odpověď obsahuje uniqueId, documentType, dataEntries.
+- Operace proběhne bez chyby.
