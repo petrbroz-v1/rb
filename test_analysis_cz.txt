@@ -1,55 +1,59 @@
-Use Case 1:
-Název: Uložení dokumentu do DMS2 přes aplikaci ICH (REQ_01)
-Cílový systém: DMS2
-Zdroje: Aplikace ICH
-Stav požadavku: READY-DEV
-Business požadavek: BREQ_01 – Ukládání dokumentů
+Use Case 1 - REQ_01
+Název: Uložení nového dokumentu včetně binárního obsahu a metadat do DMS2
 
-Popis:
-Uživatel (nebo aplikace ICH) chce uložit nový dokument (např. sken dokladu) do systému DMS2. Dokument obsahuje jak binární obsah, tak metadata. Při nahrání dokumentu dojde k uložení v DMS2 a metadata jsou paralelně zaznamenána v systému ICH.
+Cíl:
+Ověřit, že DMS2 umožní úspěšné uložení nového dokumentu, který obsahuje binární data i metadata, a v odpovědi vrátí UUID a informaci o aktuální verzi.
 
 Předpoklady:
-Aplikace ICH má přístup k API KONG nad DMS2.
-API endpoint /document je dostupný a funkční.
-Uživatel nebo proces má práva pro uložení dokumentu.
+Systém DMS2 je dostupný a připraven zpracovat příchozí POST požadavek.
+Aplikace (např. ICH nebo UniFE) je autentizovaná a má práva pro ukládání dokumentů.
+Dokument s daným obsahem zatím v systému neexistuje (jedná se o první verzi).
+Metadata jsou validní dle očekávání backendu.
+Vstupní data jsou správně naformátována (multipart/form-data nebo JSON podle API specifikace).
 
 Scénář:
-Uživatel zpracuje dokument ve zdrojovém systému (např. sken OP).
-Aplikace ICH odešle požadavek POST /document na DMS2.
-Vstup obsahuje: binární obsah dokumentu + metadata (documentId, createdBy, createdDate, volitelně partyId).
-DMS2 uloží dokument a přidělí mu UUID.
-DMS2 vrací odpověď s potvrzením o uložení, včetně UUID a výchozí verze.
-Metadata dokumentu jsou uložena v ICH (DMS2 si drží jen část metadat).
+Krok	Akce	                                                                            Očekávaný výsledek
+1	    Aplikace odešle POST požadavek na /api/{repositoryName}/documents/document	        Backend přijme požadavek
+2	    V těle požadavku jsou předány:	
+            – binární obsah dokumentu (content)	
+            – metadata (např. documentName, createdBy, createdDate, partyId)	
+3	    Backend ověří metadata a obsah	                                                    Validace vstupních dat proběhne úspěšně
+4	    Backend uloží dokument a metadata	                                                Dokument a metadata jsou uložené do úložiště a databáze
+5	    Backend vytvoří novou verzi dokumentu (výchozí – žádná/minor/major není nastavena)	Verze je prázdná nebo null dle návrhu
+6	    Backend odpoví s HTTP 201 Created	                                                V odpovědi je JSON s UUID a aktuální verzí (version)
 
 Očekávaný výsledek:
-Dokument je úspěšně uložen.
-UUID a verze jsou vráceny v response.
-Žádné chyby, systém funguje podle očekávání.
+Response: HTTP 201 Created
+
+Tělo odpovědi obsahuje:
+uuid: unikátní identifikátor dokumentu
+version: aktuální verze
 
 ###################################################################
-Use Case 2
-Název: Vyhledání existujícího dokumentu v DMS2 podle UUID (REQ_05)
-Cílový systém: DMS2
-Zdroje: Aplikace ICH nebo UniFE
-Stav požadavku: READY-DEV
-Business požadavek: BREQ_03 – Vyhledávání a indexace
+Use Case 2 - REQ_05
+Název: Vyhledání konkrétního dokumentu v DMS2 pomocí UUID (uniqueId) zaslaného v těle GET požadavku
 
-Popis:
-Uživatel (nebo aplikace) potřebuje dohledat existující dokument uložený v DMS2 pomocí jednoznačného identifikátoru (UUID). Dokument je vyhledán a vrácen včetně metadat a obsahu.
+Cíl:
+Ověřit, že DMS2 správně zpracuje požadavek na vyhledání dokumentu podle UUID zaslaného v těle a vrátí aktuální verzi dokumentu v odpovídajícím formátu.
 
 Předpoklady:
-Dokument byl dříve uložen a existuje v systému DMS2.
-Aplikace má právo dokument vyhledat a zobrazit.
-UUID dokumentu je známé (např. uložen v CRM/ICH).
+Dokument s daným UUID (uniqueId) existuje v systému.
+API endpoint /api/{repositoryName}/documents/document je dostupný.
+Autentizace a oprávnění uživatele jsou v pořádku.
+Verze dokumentu není specifikována → systém vrací CURRENT.
 
 Scénář:
-Aplikace odešle požadavek GET /document/{documentId}.
-DMS2 ověří oprávnění volajícího systému.
-Systém najde dokument podle UUID.
-Vrací metadata a binární obsah dokumentu.
-Vrací aktuální verzi (CURRENT_VERSION) nebo verzi definovanou ve vstupu.
+Krok	Akce	                                                                                    Očekávaný výsledek
+1	    Aplikace odešle GET požadavek na /api/client/documents/document	                            Backend přijme požadavek s tělem obsahujícím uniqueId
+2	    V těle JSON požadavku je uvedeno: { "uniqueId": "123e4567-e89b-12d3-a456-426614174000" }	Validní UUID dokumentu pro hledání
+3	    Backend ověří oprávnění uživatele (dle hlaviček X-User-*)	                                Pokud oprávnění platná → pokračuje
+4	    Backend vyhledá dokument podle UUID a načte CURRENT verzi	                                Dokument nalezen, načtena odpovídající verze
+5	    Backend sestaví a odešle odpověď s HTTP 200 OK	                                            Obsahuje metadata, UUID, createdDate, apod.
 
 Očekávaný výsledek:
-Dokument je úspěšně nalezen a vrácen.
-Vrácený obsah odpovídá uloženému.
-Vyhledávání proběhne bez chyby, včetně paginace nebo filtrace podle vstupních parametrů.
+Response: HTTP 200 OK
+
+Tělo odpovědi obsahuje:
+- documentId (UUID)
+- version = CURRENT
+- createdBy, createdDate, documentName, atd.

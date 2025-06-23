@@ -1,6 +1,6 @@
 # RB DMS API DEMO
 
-This project contains Robot Framework tests for DMS2 API endpoints.
+This project contains Robot Framework tests for DMS2 API endpoints. All API logic is implemented in Python, and test data is provided as Python modules for direct import. No RequestsLibrary or JSON data files are used.
 
 ## Project Structure
 - `tests/` — Robot Framework test cases (one test per file, e.g. create/get document)
@@ -13,11 +13,10 @@ This project contains Robot Framework tests for DMS2 API endpoints.
    ```sh
    pip install -r requirements.txt
    ```
-2. Run tests from the project root, ensuring `PYTHONPATH` includes the root directory:
+2. Run tests from the project root:
    ```sh
-   PYTHONPATH=. robot tests/
+   robot tests/
    ```
-   This is required so Robot Framework can import the `data` modules.
 
 ## Scenarios Covered
 - Create a new document (POST /api/{repositoryName}/documents)

@@ -1,66 +1,58 @@
-Use Case 1
-Title: Saving a Document to DMS2 via the ICH Application (REQ_01)
-Target System: DMS2
-Sources: ICH Application
-Request Status: READY-DEV
-Business Requirement: BREQ_01 – Document Storage
+Use Case 1 – REQ_01
+Title: Saving a new document including binary content and metadata into DMS2
 
-Description:
-The user (or the ICH application) wants to save a new document (e.g., a scanned certificate) into the DMS2 system. The document includes both binary content and metadata. When the document is uploaded, it is stored in DMS2, and the metadata is simultaneously recorded in the ICH system.
+Objective:
+Verify that DMS2 allows successful storage of a new document containing both binary data and metadata, and that the response returns the UUID and current version information.
 
-Assumptions:
-The ICH application has access to the KONG API above DMS2.
-The API endpoint /document is available and functional.
-The user or process has permission to store the document.
+Preconditions:
+The DMS2 system is available and ready to process incoming POST requests.
+The application (e.g., ICH or UniFE) is authenticated and has permission to store documents.
+The document with the given content does not yet exist in the system (this is the first version).
+The metadata is valid as expected by the backend.
+The input data is properly formatted (multipart/form-data or JSON according to the API specification).
 
 Scenario:
-The user processes the document in the source system (e.g., scans an ID card).
-The ICH application sends a POST /document request to DMS2.
-The input includes: binary document content + metadata (documentId, createdBy, createdDate, optionally partyId).
-DMS2 stores the document and assigns it a UUID.
-DMS2 returns a response confirming storage, including the UUID and default version.
-The document’s metadata is stored in ICH (DMS2 only keeps part of the metadata).
+Step	Action	                                                                            Expected Result
+1	    The application sends a POST request to /api/{repositoryName}/documents/document	Backend receives the request
+2	    The request body contains:
+            – binary document content (content)
+            – metadata (e.g., documentName, createdBy, createdDate, partyId)	
+3	Backend validates the metadata and content	                                            Input validation is successful
+4	Backend saves the document and metadata	                                                Document and metadata are stored in the storage and database
+5	Backend creates a new version of the document (initial – no/minor/major version is set)	Version is empty or null as per design
+6	Backend responds with HTTP 201 Created	                                                Response contains JSON with the UUID and current version
 
 Expected Result:
-The document is successfully stored.
-UUID and version are returned in the response.
-No errors, the system works as expected.
+Response: HTTP 201 Created
 
-###################################################################
-Use Case 2
-Title: Retrieving an Existing Document from DMS2 by UUID (REQ_05)
-Target System: DMS2
-Sources: ICH Application or UniFE
-Request Status: READY-DEV
-Business Requirement: BREQ_03 – Search and Indexing
+Response body contains:
+uuid: Unique identifier of the document
+version: Current version
 
-Description:
-The user (or application) needs to retrieve an existing document stored in DMS2 using a unique identifier (UUID). The document is found and returned along with its metadata and content.
+Use Case 2 – REQ_05
+Title: Retrieving a specific document from DMS2 using UUID (uniqueId) sent in the body of a GET request
 
-Assumptions:
+Objective:
+Verify that DMS2 correctly processes the request to find a document based on the UUID sent in the body and returns the current version of the document in the expected format.
 
-The document was previously stored and exists in DMS2.
-
-The application has the rights to search for and display the document.
-
-The UUID of the document is known (e.g., stored in CRM/ICH).
+Preconditions:
+The document with the given UUID (uniqueId) exists in the system.
+The API endpoint /api/{repositoryName}/documents/document is available.
+User authentication and authorization are valid.
+Document version is not specified → system returns the CURRENT version.
 
 Scenario:
-
-The application sends a GET /document/{documentId} request.
-
-DMS2 verifies the calling system's permissions.
-
-The system finds the document by UUID.
-
-It returns the document’s metadata and binary content.
-
-It returns the current version (CURRENT_VERSION) or a version defined in the input.
+Step	Action	                                                                                Expected Result
+1	    The application sends a GET request to /api/client/documents/document	                Backend receives the request with the body containing uniqueId
+2	    The request body contains JSON: { "uniqueId": "123e4567-e89b-12d3-a456-426614174000" }	A valid UUID for the document being searched for
+3	    Backend validates user permissions (based on X-User-* headers)	If permissions are valid → continue
+4	    Backend finds the document by UUID and retrieves the CURRENT version	Document is found, appropriate version is loaded
+5	    Backend builds and sends the response with HTTP 200 OK	Contains metadata, UUID, createdDate, etc.
 
 Expected Result:
+Response: HTTP 200 OK
 
-The document is successfully found and returned.
-
-The returned content matches what was stored.
-
-The search completes without error, including pagination or filtering based on input parameters.
+Response body contains:
+documentId (UUID)
+version = CURRENT
+createdBy, createdDate, documentName, etc.
