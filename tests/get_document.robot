@@ -9,3 +9,4 @@ Get Document
     [Setup]    Get Data For Get Document Test
     ${result}=    Get Document Api    ${REPOSITORY}    ${ENV}    ${UNIQUE_ID}    ${HEADERS}
     Should Be Equal    ${result['uniqueId']}    ${UNIQUE_ID}
+    Should Be Equal    ${result['version']}    CURRENT

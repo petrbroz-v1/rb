@@ -9,3 +9,4 @@ Create Document
     [Setup]    Get Data For Create Document Test
     ${result}=    Create Document Api    ${REPOSITORY}    ${ENV}    ${DOCUMENT_DATA}    ${HEADERS}
     Should Contain    ${result}    uniqueId
+    Should Contain    ${result}    version
